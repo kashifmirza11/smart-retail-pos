@@ -244,3 +244,171 @@ th {
   height: 300px;
   margin-top: 20px;
 }
+.products-page {
+  width: 100%;
+}
+
+.products-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.products-header h1 {
+  margin: 0 0 6px;
+  text-align: left;
+  color: #1e293b;
+}
+
+.products-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.add-product {
+  padding: 12px 18px;
+  color: white;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.product-tools {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 18px;
+  background: white;
+  border-radius: 12px;
+}
+
+.product-tools input {
+  flex: 1;
+  padding: 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.product-tools select {
+  padding: 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.product-table {
+  padding: 20px;
+  overflow-x: auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.08);
+}
+
+.low-badge,
+.stock-badge {
+  display: inline-block;
+  min-width: 45px;
+  padding: 6px 10px;
+  text-align: center;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.low-badge {
+  color: #c2410c;
+  background: #ffedd5;
+}
+
+.stock-badge {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.edit-button,
+.delete-button {
+  padding: 7px 11px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.edit-button {
+  margin-right: 8px;
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.delete-button {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+@media (max-width: 600px) {
+  .products-header,
+  .product-tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+.product-form {
+  margin-bottom: 22px;
+  padding: 22px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.08);
+}
+
+.form-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.form-heading h2 {
+  margin: 0;
+  color: #1e293b;
+}
+
+.close-form {
+  width: 36px;
+  height: 36px;
+  color: #64748b;
+  background: #e2e8f0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.form-fields {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.form-fields input,
+.form-fields select {
+  width: 100%;
+  padding: 11px;
+  color: #1e293b;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.save-product {
+  margin-top: 16px;
+  padding: 11px 18px;
+  color: white;
+  background: #16a34a;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+@media (max-width: 800px) {
+  .form-fields {
+    grid-template-columns: 1fr;
+  }
+}
