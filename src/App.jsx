@@ -14,17 +14,44 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-const salesData = [
-  { day: "Mon", sales: 32000 },
-  { day: "Tue", sales: 45000 },
-  { day: "Wed", sales: 38000 },
-  { day: "Thu", sales: 52000 },
-  { day: "Fri", sales: 61000 },
-  { day: "Sat", sales: 72000 },
-  { day: "Sun", sales: 48500 },
-];
+
 function App() {
   const [activePage, setActivePage] = useState("dashboard");
+  const savedProducts = JSON.parse(localStorage.getItem("products")) || [];
+
+  const savedSales = JSON.parse(localStorage.getItem("sales")) || [];
+const salesData = Array.from({ length: 7 }, (_, index) => {
+  const date = new Date();
+  date.setDate(date.getDate() - (6 - index));
+
+  const day = date.toLocaleDateString("en-US", {
+    weekday: "short",
+  });
+
+  const sales = savedSales
+    .filter((sale) => {
+      const saleDate = new Date(
+        sale.date || sale.createdAt || sale.saleDate || Date.now(),
+      );
+
+      return saleDate.toDateString() === date.toDateString();
+    })
+    .reduce((sum, sale) => sum + Number(sale.total || 0), 0);
+
+  return { day, sales };
+});
+  const totalProducts = savedProducts.length;
+
+  const totalSales = savedSales.length;
+
+  const totalRevenue = savedSales.reduce(
+    (sum, sale) => sum + Number(sale.total),
+    0,
+  );
+
+  const lowStockItems = savedProducts.filter(
+    (product) => Number(product.stock) <= 5,
+  ).length;
  const handleAddProduct = () => {
    if (
      newProduct.name.trim() === "" ||
@@ -119,32 +146,37 @@ function App() {
                 <p>Welcome back, Kashif!</p>
               </div>
 
-              <button className="new-sale">+ New Sale</button>
+              <button
+                className="add-product-btn"
+                onClick={() => setActivePage("sales")}
+              >
+                + New Sale
+              </button>
             </header>
 
             <section className="cards">
               <div className="card">
-                <p>Today's Sales</p>
-                <h2>PKR 48,500</h2>
-                <span>12% increase</span>
+                <h3>Total Products</h3>
+                <p>{totalProducts}</p>
+                <span>Available store products</span>
               </div>
 
               <div className="card">
-                <p>Monthly Sales</p>
-                <h2>PKR 425,000</h2>
-                <span>8% increase</span>
+                <h3>Completed Sales</h3>
+                <p>{totalSales}</p>
+                <span>Total completed transactions</span>
               </div>
 
               <div className="card">
-                <p>Total Orders</p>
-                <h2>132</h2>
-                <span>24 today</span>
+                <h3>Total Revenue</h3>
+                <p>PKR {totalRevenue.toLocaleString()}</p>
+                <span>Revenue from completed sales</span>
               </div>
 
               <div className="card">
-                <p>Total Products</p>
-                <h2>286</h2>
-                <span>8 low in stock</span>
+                <h3>Low Stock Items</h3>
+                <p>{lowStockItems}</p>
+                <span>Products with stock 5 or less</span>
               </div>
             </section>
             <section className="sales-chart">
@@ -170,7 +202,9 @@ function App() {
             <section className="recent-sales">
               <div className="section-heading">
                 <h2>Recent Sales</h2>
-                <button>View All</button>
+                <button onClick={() => setActivePage("reports")}>
+                  View All
+                </button>
               </div>
 
               <table>
@@ -184,40 +218,45 @@ function App() {
                     <th>Status</th>
                   </tr>
                 </thead>
-
                 <tbody>
-                  <tr>
-                    <td>#1001</td>
-                    <td>Ali Khan</td>
-                    <td>3 Items</td>
-                    <td>Cash</td>
-                    <td>PKR 3,500</td>
-                    <td>
-                      <span className="status">Completed</span>
-                    </td>
-                  </tr>
+                  {savedSales.length === 0 ? (
+                    <tr>
+                      <td colSpan="6">No sales found.</td>
+                    </tr>
+                  ) : (
+                    savedSales
+                      .slice(-5)
+                      .reverse()
+                      .map((sale, index) => (
+                        <tr key={sale.id || index}>
+                          <td>#{sale.id || savedSales.length - index}</td>
 
-                  <tr>
-                    <td>#1002</td>
-                    <td>Ahmed Raza</td>
-                    <td>2 Items</td>
-                    <td>Card</td>
-                    <td>PKR 2,800</td>
-                    <td>
-                      <span className="status">Completed</span>
-                    </td>
-                  </tr>
+                          <td>
+                            {sale.customerName ||
+                              sale.customer ||
+                              "Walk-in Customer"}
+                          </td>
 
-                  <tr>
-                    <td>#1003</td>
-                    <td>Sara Ali</td>
-                    <td>5 Items</td>
-                    <td>Cash</td>
-                    <td>PKR 6,200</td>
-                    <td>
-                      <span className="status">Completed</span>
-                    </td>
-                  </tr>
+                          <td>
+                            {sale.productName ||
+                              sale.product ||
+                              `${sale.quantity || 1} Item`}
+                          </td>
+
+                          <td>
+                            {sale.paymentMethod || sale.payment || "Cash"}
+                          </td>
+
+                          <td>
+                            PKR {Number(sale.total || 0).toLocaleString()}
+                          </td>
+
+                          <td>
+                            <span className="status completed">Completed</span>
+                          </td>
+                        </tr>
+                      ))
+                  )}
                 </tbody>
               </table>
             </section>

@@ -89,8 +89,15 @@ function Sales() {
           <option value="">Select a product</option>
 
           {products.map((product) => (
-            <option key={product.id} value={product.id}>
-              {product.name} — PKR {product.price} — Stock: {product.stock}
+            <option
+              key={product.id}
+              value={product.id}
+              disabled={Number(product.stock) === 0}
+            >
+              {product.name} - PKR {product.price} -{" "}
+              {Number(product.stock) === 0
+                ? "Out of Stock"
+                : `Stock: ${product.stock}`}
             </option>
           ))}
         </select>
@@ -98,6 +105,7 @@ function Sales() {
         <input
           type="number"
           min="1"
+          max={selectedProduct ? selectedProduct.stock : 1}
           placeholder="Quantity"
           value={quantity}
           onChange={(event) => setQuantity(Number(event.target.value))}
