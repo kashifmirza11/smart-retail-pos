@@ -1,6 +1,10 @@
 import "./App.css";
 import { useState } from "react";
 import Products from "./Products";
+import Sales from "./Sales";
+import SalesHistory from "./SalesHistory";
+import Inventory from "./Inventory";
+import Employees from "./Employees";
 import {
   BarChart,
   Bar,
@@ -69,16 +73,44 @@ function App() {
           >
             Products
           </button>
-          <button>Sales</button>
-          <button>Inventory</button>
-          <button>Employees</button>
-          <button>Reports</button>
+          <button
+            className={activePage === "sales" ? "active" : ""}
+            onClick={() => setActivePage("sales")}
+          >
+            Sales
+          </button>
+          <button
+            className={activePage === "inventory" ? "active" : ""}
+            onClick={() => setActivePage("inventory")}
+          >
+            Inventory
+          </button>
+          <button
+            className={activePage === "employees" ? "active" : ""}
+            onClick={() => setActivePage("employees")}
+          >
+            Employees
+          </button>
+          <button
+            className={activePage === "reports" ? "active" : ""}
+            onClick={() => setActivePage("reports")}
+          >
+            Reports
+          </button>
         </nav>
       </aside>
 
       <main className="main-content">
         {activePage === "products" ? (
           <Products />
+        ) : activePage === "sales" ? (
+          <Sales />
+        ) : activePage === "inventory" ? (
+          <Inventory />
+        ) : activePage === "employees" ? (
+          <Employees />
+        ) : activePage === "reports" ? (
+          <SalesHistory />
         ) : (
           <>
             <header>

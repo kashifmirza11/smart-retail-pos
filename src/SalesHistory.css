@@ -1,0 +1,59 @@
+.sales-history-page {
+  padding: 30px;
+}
+
+.sales-history-header {
+  margin-bottom: 25px;
+}
+
+.sales-history-header h1 {
+  margin: 0;
+  color: #172033;
+  font-size: 36px;
+}
+
+.sales-history-header p {
+  margin-top: 5px;
+  color: #64748b;
+}
+
+.sales-history-table {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 5px 20px rgba(15, 23, 42, 0.08);
+  overflow-x: auto;
+}
+
+.sales-history-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sales-history-table th,
+.sales-history-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.sales-history-table th {
+  color: #475569;
+  background: #f8fafc;
+}
+
+.completed-status {
+  display: inline-block;
+  padding: 6px 12px;
+  color: #15803d;
+  background: #dcfce7;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.no-sales {
+  padding: 30px;
+  color: #64748b;
+  text-align: center;
+}
