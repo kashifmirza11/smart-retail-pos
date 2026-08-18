@@ -6,7 +6,7 @@ function Sales() {
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [selectedProductId, setSelectedProductId] = useState("");
   const [quantity, setQuantity] = useState(1);
-
+const [receipt, setReceipt] = useState(null);
   const products = JSON.parse(localStorage.getItem("products")) || [];
 
   const selectedProduct = products.find(
@@ -57,18 +57,7 @@ function Sales() {
 
     localStorage.setItem("products", JSON.stringify(updatedProducts));
 
-   alert(
-     `SALE RECEIPT
-
-Order ID: ${newSale.id}
-Customer: ${newSale.customer}
-Product: ${newSale.product}
-Quantity: ${newSale.quantity}
-Payment: ${newSale.paymentMethod}
-Total: PKR ${Number(newSale.total).toLocaleString()}
-
-Sale completed successfully!`,
-   );
+ setReceipt(newSale);
 
     setCustomerName("");
     setSelectedProductId("");
@@ -82,7 +71,6 @@ Sale completed successfully!`,
         <h1>New Sale</h1>
         <p>Create and manage customer sales.</p>
       </div>
-
       <div className="sale-form">
         <h2>Customer Details</h2>
 
@@ -144,6 +132,43 @@ Sale completed successfully!`,
           Complete Sale
         </button>
       </div>
+      {receipt && (
+        <div className="receipt-overlay">
+          <div className="receipt-modal">
+            <h2>Smart POS</h2>
+            <p className="receipt-title">SALE RECEIPT</p>
+
+            <div className="receipt-details">
+              <p>
+                <strong>Order ID:</strong> {receipt.id}
+              </p>
+              <p>
+                <strong>Customer:</strong> {receipt.customer}
+              </p>
+              <p>
+                <strong>Product:</strong> {receipt.product}
+              </p>
+              <p>
+                <strong>Quantity:</strong> {receipt.quantity}
+              </p>
+              <p>
+                <strong>Payment:</strong> {receipt.paymentMethod}
+              </p>
+              <p>
+                <strong>Date:</strong> {receipt.date}
+              </p>
+              <hr />
+              <h3>Total: PKR {Number(receipt.total).toLocaleString()}</h3>
+            </div>
+
+            <div className="receipt-actions">
+              <button onClick={() => window.print()}>Print Receipt</button>
+
+              <button onClick={() => setReceipt(null)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}{" "}
     </div>
   );
 }
