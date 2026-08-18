@@ -57,7 +57,18 @@ function Sales() {
 
     localStorage.setItem("products", JSON.stringify(updatedProducts));
 
-    alert("Sale completed successfully!");
+   alert(
+     `SALE RECEIPT
+
+Order ID: ${newSale.id}
+Customer: ${newSale.customer}
+Product: ${newSale.product}
+Quantity: ${newSale.quantity}
+Payment: ${newSale.paymentMethod}
+Total: PKR ${Number(newSale.total).toLocaleString()}
+
+Sale completed successfully!`,
+   );
 
     setCustomerName("");
     setSelectedProductId("");
