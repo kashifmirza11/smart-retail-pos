@@ -57,3 +57,74 @@
   color: #64748b;
   text-align: center;
 }
+.report-filters {
+  display: grid;
+ grid-template-columns: 2fr 1fr 1fr auto auto;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 18px;
+  background: white;
+  border-radius: 12px;
+}
+
+.report-filters input,
+.report-filters select,
+.report-filters button {
+  padding: 11px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.report-filters button {
+  border: none;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+@media (max-width: 800px) {
+  .report-filters {
+    grid-template-columns: 1fr;
+  }
+}
+.report-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.report-summary div {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.report-summary span {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.report-summary strong {
+  color: #2563eb;
+  font-size: 24px;
+}
+
+@media (max-width: 600px) {
+  .report-summary {
+    grid-template-columns: 1fr;
+  }
+}
+.report-filters .export-button {
+  background: #16a34a;
+}
+
+.report-filters .export-button:hover {
+  background: #15803d;
+}
