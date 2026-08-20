@@ -1,8 +1,11 @@
+import { useState } from "react";
 import "./Inventory.css";
 
 function Inventory() {
   const products = JSON.parse(localStorage.getItem("products")) || [];
-const stockHistory = JSON.parse(localStorage.getItem("stockHistory")) || [];
+ const [stockHistory, setStockHistory] = useState(
+   () => JSON.parse(localStorage.getItem("stockHistory")) || [],
+ );
   const totalProducts = products.length;
 
   const totalStock = products.reduce(
@@ -13,7 +16,16 @@ const stockHistory = JSON.parse(localStorage.getItem("stockHistory")) || [];
   const lowStockProducts = products.filter(
     (product) => Number(product.stock) <= 5,
   ).length;
+const handleClearHistory = () => {
+  const confirmed = window.confirm(
+    "Are you sure you want to clear stock movement history?",
+  );
 
+  if (confirmed) {
+    localStorage.removeItem("stockHistory");
+    setStockHistory([]);
+  }
+};
   return (
     <div className="inventory-page">
       <div className="inventory-header">
@@ -74,7 +86,19 @@ const stockHistory = JSON.parse(localStorage.getItem("stockHistory")) || [];
         </table>
       </div>
       <div className="stock-history">
-        <h2>Stock Movement History</h2>
+        <div className="stock-history-heading">
+          <h2>Stock Movement History</h2>
+
+          {stockHistory.length > 0 && (
+            <button
+              type="button"
+              className="clear-history-button"
+              onClick={handleClearHistory}
+            >
+              Clear History
+            </button>
+          )}
+        </div>
 
         {stockHistory.length === 0 ? (
           <p className="no-stock-history">No stock movements found.</p>

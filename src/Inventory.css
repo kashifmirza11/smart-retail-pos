@@ -144,3 +144,28 @@
   background: #fee2e2;
   color: #dc2626;
 }
+.stock-history-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.stock-history-heading h2 {
+  margin: 0;
+}
+
+.clear-history-button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  background: #fee2e2;
+  color: #dc2626;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clear-history-button:hover {
+  background: #dc2626;
+  color: white;
+}
