@@ -52,6 +52,9 @@ const salesData = Array.from({ length: 7 }, (_, index) => {
   const lowStockItems = savedProducts.filter(
     (product) => Number(product.stock) <= 5,
   ).length;
+  const lowStockProducts = savedProducts.filter(
+    (product) => Number(product.stock) <= 5,
+  );
  const handleAddProduct = () => {
    if (
      newProduct.name.trim() === "" ||
@@ -153,7 +156,27 @@ const salesData = Array.from({ length: 7 }, (_, index) => {
                 + New Sale
               </button>
             </header>
+            {lowStockProducts.length > 0 && (
+              <div className="low-stock-alert">
+                <div>
+                  <strong>⚠ Low Stock Alert</strong>
+                  <p>
+                    {lowStockProducts
+                      .map(
+                        (product) => `${product.name} (${product.stock} left)`,
+                      )
+                      .join(", ")}
+                  </p>
+                </div>
 
+                <button
+                  type="button"
+                  onClick={() => setActivePage("inventory")}
+                >
+                  View Inventory
+                </button>
+              </div>
+            )}
             <section className="cards">
               <div className="card">
                 <h3>Total Products</h3>

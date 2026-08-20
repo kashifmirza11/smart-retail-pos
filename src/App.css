@@ -412,3 +412,47 @@ th {
     grid-template-columns: 1fr;
   }
 }
+.low-stock-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-left: 5px solid #f97316;
+  border-radius: 12px;
+  color: #9a3412;
+}
+
+.low-stock-alert strong {
+  font-size: 17px;
+}
+
+.low-stock-alert p {
+  margin: 5px 0 0;
+  color: #c2410c;
+}
+
+.low-stock-alert button {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #f97316;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.low-stock-alert button:hover {
+  background: #ea580c;
+}
+
+@media (max-width: 700px) {
+  .low-stock-alert {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
