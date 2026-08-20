@@ -58,6 +58,29 @@ function Products() {
 
     return matchesSearch && matchesCategory;
   });
+  const handleRestock = (product) => {
+    const amount = Number(
+      prompt(`How many units do you want to add for ${product.name}?`),
+    );
+
+    if (!Number.isInteger(amount) || amount <= 0) {
+      alert("Please enter a valid quantity greater than 0.");
+      return;
+    }
+
+    setProducts((currentProducts) =>
+      currentProducts.map((item) =>
+        item.id === product.id
+          ? {
+              ...item,
+              stock: Number(item.stock) + amount,
+            }
+          : item,
+      ),
+    );
+
+    alert(`${amount} units added to ${product.name}.`);
+  };
   const handleAddProduct = () => {
     if (
       newProduct.name.trim() === "" ||
@@ -254,6 +277,13 @@ function Products() {
                     onClick={() => handleEditProduct(product)}
                   >
                     Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="restock-button"
+                    onClick={() => handleRestock(product)}
+                  >
+                    Restock
                   </button>
                   <button
                     type="button"

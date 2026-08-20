@@ -456,3 +456,17 @@ th {
     flex-direction: column;
   }
 }
+.restock-button {
+  padding: 9px 12px;
+  margin: 0 7px;
+  border: none;
+  border-radius: 7px;
+  background: #dcfce7;
+  color: #15803d;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.restock-button:hover {
+  background: #bbf7d0;
+}
