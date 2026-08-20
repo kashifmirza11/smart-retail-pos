@@ -131,3 +131,33 @@
     grid-template-columns: 1fr;
   }
 }
+.status-employee-button {
+  margin-right: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 7px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.status-employee-button:hover {
+  background: #2563eb;
+  color: white;
+}
+.edit-employee-button {
+  margin-right: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 7px;
+  background: #fef3c7;
+  color: #b45309;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.edit-employee-button:hover {
+  background: #f59e0b;
+  color: white;
+}

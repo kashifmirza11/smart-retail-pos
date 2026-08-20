@@ -26,7 +26,7 @@ function Employees() {
   });
 
   const [showForm, setShowForm] = useState(false);
-
+const [editingEmployeeId, setEditingEmployeeId] = useState(null);
   const [newEmployee, setNewEmployee] = useState({
     name: "",
     role: "Cashier",
@@ -44,15 +44,30 @@ function Employees() {
       return;
     }
 
-    setEmployees([
-      ...employees,
-      {
-        id: Date.now(),
-        ...newEmployee,
-        name: newEmployee.name.trim(),
-        phone: newEmployee.phone.trim(),
-      },
-    ]);
+    if (editingEmployeeId !== null) {
+      setEmployees(
+        employees.map((employee) =>
+          employee.id === editingEmployeeId
+            ? {
+                ...employee,
+                ...newEmployee,
+                name: newEmployee.name.trim(),
+                phone: newEmployee.phone.trim(),
+              }
+            : employee,
+        ),
+      );
+    } else {
+      setEmployees([
+        ...employees,
+        {
+          id: Date.now(),
+          ...newEmployee,
+          name: newEmployee.name.trim(),
+          phone: newEmployee.phone.trim(),
+        },
+      ]);
+    }
 
     setNewEmployee({
       name: "",
@@ -61,9 +76,20 @@ function Employees() {
       status: "Active",
     });
 
+    setEditingEmployeeId(null);
     setShowForm(false);
   };
+const handleEditEmployee = (employee) => {
+  setNewEmployee({
+    name: employee.name,
+    role: employee.role,
+    phone: employee.phone,
+    status: employee.status,
+  });
 
+  setEditingEmployeeId(employee.id);
+  setShowForm(true);
+};
   const handleDeleteEmployee = (employeeId) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this employee?",
@@ -73,7 +99,18 @@ function Employees() {
       setEmployees(employees.filter((employee) => employee.id !== employeeId));
     }
   };
-
+const handleToggleStatus = (employeeId) => {
+  setEmployees(
+    employees.map((employee) =>
+      employee.id === employeeId
+        ? {
+            ...employee,
+            status: employee.status === "Active" ? "Inactive" : "Active",
+          }
+        : employee,
+    ),
+  );
+};
   return (
     <div className="employees-page">
       <div className="employees-header">
@@ -144,11 +181,22 @@ function Employees() {
             <option>Inactive</option>
           </select>
 
-          <button onClick={handleAddEmployee}>Save Employee</button>
+          <button onClick={handleAddEmployee}>
+            {editingEmployeeId !== null ? "Update Employee" : "Save Employee"}
+          </button>
 
           <button
             className="cancel-employee-button"
-            onClick={() => setShowForm(false)}
+            onClick={() => {
+              setShowForm(false);
+              setEditingEmployeeId(null);
+              setNewEmployee({
+                name: "",
+                role: "Cashier",
+                phone: "",
+                status: "Active",
+              });
+            }}
           >
             Cancel
           </button>
@@ -185,6 +233,20 @@ function Employees() {
                   </span>
                 </td>
                 <td>
+                  <button
+                    type="button"
+                    className="edit-employee-button"
+                    onClick={() => handleEditEmployee(employee)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="status-employee-button"
+                    onClick={() => handleToggleStatus(employee.id)}
+                  >
+                    {employee.status === "Active" ? "Deactivate" : "Activate"}
+                  </button>
                   <button
                     className="delete-employee-button"
                     onClick={() => handleDeleteEmployee(employee.id)}
