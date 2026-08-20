@@ -48,7 +48,18 @@ const salesData = Array.from({ length: 7 }, (_, index) => {
     (sum, sale) => sum + Number(sale.total),
     0,
   );
+const today = new Date().toDateString();
 
+const todaySales = savedSales.filter((sale) => {
+  return new Date(sale.date).toDateString() === today;
+});
+
+const todaySalesCount = todaySales.length;
+
+const todayRevenue = todaySales.reduce(
+  (sum, sale) => sum + Number(sale.total),
+  0,
+);
   const lowStockItems = savedProducts.filter(
     (product) => Number(product.stock) <= 5,
   ).length;
@@ -200,6 +211,17 @@ const salesData = Array.from({ length: 7 }, (_, index) => {
                 <h3>Low Stock Items</h3>
                 <p>{lowStockItems}</p>
                 <span>Products with stock 5 or less</span>
+              </div>
+              <div className="card today-card">
+                <h3>Today’s Sales</h3>
+                <p>{todaySalesCount}</p>
+                <span>Transactions completed today</span>
+              </div>
+
+              <div className="card today-card">
+                <h3>Today’s Revenue</h3>
+                <p>PKR {todayRevenue.toLocaleString()}</p>
+                <span>Revenue generated today</span>
               </div>
             </section>
             <section className="sales-chart">
