@@ -470,3 +470,104 @@ th {
 .restock-button:hover {
   background: #bbf7d0;
 }
+.top-product-insight {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding: 24px 28px;
+  border-radius: 14px;
+  color: white;
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  box-shadow: 0 12px 25px rgba(37, 99, 235, 0.2);
+}
+
+.top-product-insight h2 {
+  margin: 7px 0;
+  font-size: 26px;
+}
+
+.top-product-insight p {
+  margin: 0;
+  color: #dbeafe;
+}
+
+.insight-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #bfdbfe;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.insight-icon {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: #facc15;
+  font-size: 32px;
+}
+.payment-summary {
+  margin-top: 24px;
+  padding: 25px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+}
+
+.payment-summary-heading {
+  margin-bottom: 20px;
+}
+
+.payment-summary-heading h2 {
+  margin: 0 0 5px;
+}
+
+.payment-summary-heading p {
+  margin: 0;
+  color: #64748b;
+}
+
+.payment-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.payment-method-card {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.payment-method-card span {
+  font-weight: 600;
+}
+
+.payment-method-card strong {
+  margin: 8px 0;
+  font-size: 28px;
+}
+
+.payment-method-card small {
+  color: #64748b;
+}
+
+.cash-payment {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.card-payment {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.bank-payment {
+  background: #f3e8ff;
+  color: #7e22ce;
+}

@@ -60,6 +60,32 @@ const todayRevenue = todaySales.reduce(
   (sum, sale) => sum + Number(sale.total),
   0,
 );
+const productSales = savedSales.reduce((result, sale) => {
+  const productName = sale.product;
+  const quantity = Number(sale.quantity) || 1;
+
+  result[productName] = (result[productName] || 0) + quantity;
+  return result;
+}, {});
+
+const topSellingProduct =
+  Object.entries(productSales).sort((a, b) => b[1] - a[1])[0] || null;
+  const paymentSummary = savedSales.reduce(
+    (summary, sale) => {
+      const method = sale.paymentMethod;
+
+      if (method === "Cash") summary.cash += 1;
+      if (method === "Card") summary.card += 1;
+      if (method === "Bank Transfer") summary.bankTransfer += 1;
+
+      return summary;
+    },
+    {
+      cash: 0,
+      card: 0,
+      bankTransfer: 0,
+    },
+  );
   const lowStockItems = savedProducts.filter(
     (product) => Number(product.stock) <= 5,
   ).length;
@@ -222,6 +248,51 @@ const todayRevenue = todaySales.reduce(
                 <h3>Today’s Revenue</h3>
                 <p>PKR {todayRevenue.toLocaleString()}</p>
                 <span>Revenue generated today</span>
+              </div>
+            </section>
+            <section className="top-product-insight">
+              <div>
+                <span className="insight-label">Top Selling Product</span>
+
+                {topSellingProduct ? (
+                  <>
+                    <h2>{topSellingProduct[0]}</h2>
+                    <p>{topSellingProduct[1]} units sold</p>
+                  </>
+                ) : (
+                  <>
+                    <h2>No sales yet</h2>
+                    <p>Complete a sale to view the top product.</p>
+                  </>
+                )}
+              </div>
+
+              <div className="insight-icon">★</div>
+            </section>
+            <section className="payment-summary">
+              <div className="payment-summary-heading">
+                <h2>Payment Summary</h2>
+                <p>Completed sales by payment method</p>
+              </div>
+
+              <div className="payment-summary-cards">
+                <div className="payment-method-card cash-payment">
+                  <span>Cash</span>
+                  <strong>{paymentSummary.cash}</strong>
+                  <small>Transactions</small>
+                </div>
+
+                <div className="payment-method-card card-payment">
+                  <span>Card</span>
+                  <strong>{paymentSummary.card}</strong>
+                  <small>Transactions</small>
+                </div>
+
+                <div className="payment-method-card bank-payment">
+                  <span>Bank Transfer</span>
+                  <strong>{paymentSummary.bankTransfer}</strong>
+                  <small>Transactions</small>
+                </div>
               </div>
             </section>
             <section className="sales-chart">
