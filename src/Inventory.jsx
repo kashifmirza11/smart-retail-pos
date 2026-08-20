@@ -7,6 +7,7 @@ function Inventory() {
    () => JSON.parse(localStorage.getItem("stockHistory")) || [],
  );
  const [inventorySearch, setInventorySearch] = useState("");
+ const [stockFilter, setStockFilter] = useState("All Stock");
   const totalProducts = products.length;
 
   const totalStock = products.reduce(
@@ -20,10 +21,16 @@ function Inventory() {
   const filteredProducts = products.filter((product) => {
     const searchText = inventorySearch.toLowerCase();
 
-    return (
+    const matchesSearch =
       product.name.toLowerCase().includes(searchText) ||
-      product.category.toLowerCase().includes(searchText)
-    );
+      product.category.toLowerCase().includes(searchText);
+
+    const matchesStock =
+      stockFilter === "All Stock" ||
+      (stockFilter === "Low Stock" && Number(product.stock) <= 5) ||
+      (stockFilter === "In Stock" && Number(product.stock) > 5);
+
+    return matchesSearch && matchesStock;
   });
 const handleClearHistory = () => {
   const confirmed = window.confirm(
@@ -106,7 +113,14 @@ const handleExportHistory = () => {
           value={inventorySearch}
           onChange={(event) => setInventorySearch(event.target.value)}
         />
-
+        <select
+          value={stockFilter}
+          onChange={(event) => setStockFilter(event.target.value)}
+        >
+          <option value="All Stock">All Stock</option>
+          <option value="Low Stock">Low Stock</option>
+          <option value="In Stock">In Stock</option>
+        </select>
         {inventorySearch && (
           <button type="button" onClick={() => setInventorySearch("")}>
             Clear
