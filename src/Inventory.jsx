@@ -6,6 +6,7 @@ function Inventory() {
  const [stockHistory, setStockHistory] = useState(
    () => JSON.parse(localStorage.getItem("stockHistory")) || [],
  );
+ const [inventorySearch, setInventorySearch] = useState("");
   const totalProducts = products.length;
 
   const totalStock = products.reduce(
@@ -16,6 +17,14 @@ function Inventory() {
   const lowStockProducts = products.filter(
     (product) => Number(product.stock) <= 5,
   ).length;
+  const filteredProducts = products.filter((product) => {
+    const searchText = inventorySearch.toLowerCase();
+
+    return (
+      product.name.toLowerCase().includes(searchText) ||
+      product.category.toLowerCase().includes(searchText)
+    );
+  });
 const handleClearHistory = () => {
   const confirmed = window.confirm(
     "Are you sure you want to clear stock movement history?",
@@ -90,7 +99,20 @@ const handleExportHistory = () => {
           <strong>{lowStockProducts}</strong>
         </div>
       </div>
+      <div className="inventory-search">
+        <input
+          type="text"
+          placeholder="Search product or category..."
+          value={inventorySearch}
+          onChange={(event) => setInventorySearch(event.target.value)}
+        />
 
+        {inventorySearch && (
+          <button type="button" onClick={() => setInventorySearch("")}>
+            Clear
+          </button>
+        )}
+      </div>
       <div className="inventory-table">
         <table>
           <thead>
@@ -104,7 +126,7 @@ const handleExportHistory = () => {
           </thead>
 
           <tbody>
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <tr key={product.id}>
                 <td>{product.name}</td>
                 <td>{product.category}</td>
