@@ -26,6 +26,47 @@ const handleClearHistory = () => {
     setStockHistory([]);
   }
 };
+const handleExportHistory = () => {
+  if (stockHistory.length === 0) {
+    alert("No stock movement history available.");
+    return;
+  }
+
+  const headings = [
+    "Product",
+    "Type",
+    "Quantity",
+    "Previous Stock",
+    "New Stock",
+    "Date",
+  ];
+
+  const rows = stockHistory.map((movement) => [
+    movement.product,
+    movement.type,
+    movement.type === "Sale Out"
+      ? `-${movement.quantity}`
+      : `+${movement.quantity}`,
+    movement.previousStock,
+    movement.newStock,
+    movement.date,
+  ]);
+
+  const csvContent = [headings, ...rows]
+    .map((row) => row.map((value) => `"${value}"`).join(","))
+    .join("\n");
+
+  const file = new Blob([csvContent], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const downloadLink = document.createElement("a");
+  downloadLink.href = URL.createObjectURL(file);
+  downloadLink.download = "stock-movement-history.csv";
+  downloadLink.click();
+
+  URL.revokeObjectURL(downloadLink.href);
+};
   return (
     <div className="inventory-page">
       <div className="inventory-header">
@@ -90,13 +131,23 @@ const handleClearHistory = () => {
           <h2>Stock Movement History</h2>
 
           {stockHistory.length > 0 && (
-            <button
-              type="button"
-              className="clear-history-button"
-              onClick={handleClearHistory}
-            >
-              Clear History
-            </button>
+            <div className="history-buttons">
+              <button
+                type="button"
+                className="export-history-button"
+                onClick={handleExportHistory}
+              >
+                Export CSV
+              </button>
+
+              <button
+                type="button"
+                className="clear-history-button"
+                onClick={handleClearHistory}
+              >
+                Clear History
+              </button>
+            </div>
           )}
         </div>
 

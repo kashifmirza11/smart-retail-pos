@@ -169,3 +169,22 @@
   background: #dc2626;
   color: white;
 }
+.history-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.export-history-button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.export-history-button:hover {
+  background: #1d4ed8;
+}
