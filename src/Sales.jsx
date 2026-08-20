@@ -56,6 +56,22 @@ const [receipt, setReceipt] = useState(null);
     );
 
     localStorage.setItem("products", JSON.stringify(updatedProducts));
+    const stockHistory = JSON.parse(localStorage.getItem("stockHistory")) || [];
+
+    const saleMovement = {
+      id: Date.now(),
+      product: selectedProduct.name,
+      type: "Sale Out",
+      quantity: quantity,
+      previousStock: Number(selectedProduct.stock),
+      newStock: Number(selectedProduct.stock) - Number(quantity),
+      date: new Date().toLocaleString(),
+    };
+
+    localStorage.setItem(
+      "stockHistory",
+      JSON.stringify([...stockHistory, saleMovement]),
+    );
 
  setReceipt(newSale);
 

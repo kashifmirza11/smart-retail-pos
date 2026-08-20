@@ -99,9 +99,16 @@ const stockHistory = JSON.parse(localStorage.getItem("stockHistory")) || [];
                   <tr key={movement.id}>
                     <td>{movement.product}</td>
                     <td>
-                      <span className="movement-type">{movement.type}</span>
+                      <span
+                        className={`movement-type ${movement.type === "Sale Out" ? "sale-out" : ""}`}
+                      >
+                        {movement.type}
+                      </span>
                     </td>
-                    <td>+{movement.quantity}</td>
+                    <td>
+                      {movement.type === "Sale Out" ? "-" : "+"}
+                      {movement.quantity}
+                    </td>
                     <td>{movement.previousStock}</td>
                     <td>{movement.newStock}</td>
                     <td>{movement.date}</td>

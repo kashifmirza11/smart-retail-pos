@@ -140,3 +140,7 @@
   text-align: center;
   color: #64748b;
 }
+.movement-type.sale-out {
+  background: #fee2e2;
+  color: #dc2626;
+}
