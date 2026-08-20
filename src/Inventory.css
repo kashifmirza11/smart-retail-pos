@@ -237,3 +237,9 @@
 .inventory-search select:focus {
   border-color: #2563eb;
 }
+.no-inventory-results {
+  padding: 35px 20px;
+  text-align: center;
+  color: #64748b;
+  font-weight: 600;
+}

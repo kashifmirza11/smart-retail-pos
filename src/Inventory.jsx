@@ -121,9 +121,15 @@ const handleExportHistory = () => {
           <option value="Low Stock">Low Stock</option>
           <option value="In Stock">In Stock</option>
         </select>
-        {inventorySearch && (
-          <button type="button" onClick={() => setInventorySearch("")}>
-            Clear
+        {(inventorySearch || stockFilter !== "All Stock") && (
+          <button
+            type="button"
+            onClick={() => {
+              setInventorySearch("");
+              setStockFilter("All Stock");
+            }}
+          >
+            Clear Filters
           </button>
         )}
       </div>
@@ -140,25 +146,33 @@ const handleExportHistory = () => {
           </thead>
 
           <tbody>
-            {filteredProducts.map((product) => (
-              <tr key={product.id}>
-                <td>{product.name}</td>
-                <td>{product.category}</td>
-                <td>PKR {Number(product.price).toLocaleString()}</td>
-                <td>{product.stock}</td>
-                <td>
-                  <span
-                    className={
-                      Number(product.stock) <= 5
-                        ? "inventory-status low-stock"
-                        : "inventory-status in-stock"
-                    }
-                  >
-                    {Number(product.stock) <= 5 ? "Low Stock" : "In Stock"}
-                  </span>
+            {filteredProducts.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="no-inventory-results">
+                  No matching products found.
                 </td>
               </tr>
-            ))}
+            ) : (
+              filteredProducts.map((product) => (
+                <tr key={product.id}>
+                  <td>{product.name}</td>
+                  <td>{product.category}</td>
+                  <td>PKR {Number(product.price).toLocaleString()}</td>
+                  <td>{product.stock}</td>
+                  <td>
+                    <span
+                      className={
+                        Number(product.stock) <= 5
+                          ? "inventory-status low-stock"
+                          : "inventory-status in-stock"
+                      }
+                    >
+                      {Number(product.stock) <= 5 ? "Low Stock" : "In Stock"}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
