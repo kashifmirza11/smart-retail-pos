@@ -2,7 +2,7 @@ import "./Inventory.css";
 
 function Inventory() {
   const products = JSON.parse(localStorage.getItem("products")) || [];
-
+const stockHistory = JSON.parse(localStorage.getItem("stockHistory")) || [];
   const totalProducts = products.length;
 
   const totalStock = products.reduce(
@@ -72,6 +72,44 @@ function Inventory() {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="stock-history">
+        <h2>Stock Movement History</h2>
+
+        {stockHistory.length === 0 ? (
+          <p className="no-stock-history">No stock movements found.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Type</th>
+                <th>Added</th>
+                <th>Previous Stock</th>
+                <th>New Stock</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {[...stockHistory]
+                .reverse()
+                .slice(0, 10)
+                .map((movement) => (
+                  <tr key={movement.id}>
+                    <td>{movement.product}</td>
+                    <td>
+                      <span className="movement-type">{movement.type}</span>
+                    </td>
+                    <td>+{movement.quantity}</td>
+                    <td>{movement.previousStock}</td>
+                    <td>{movement.newStock}</td>
+                    <td>{movement.date}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

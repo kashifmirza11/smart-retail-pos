@@ -67,7 +67,22 @@ function Products() {
       alert("Please enter a valid quantity greater than 0.");
       return;
     }
+const stockHistory = JSON.parse(localStorage.getItem("stockHistory")) || [];
 
+const movement = {
+  id: Date.now(),
+  product: product.name,
+  type: "Restock",
+  quantity: amount,
+  previousStock: Number(product.stock),
+  newStock: Number(product.stock) + amount,
+  date: new Date().toLocaleString(),
+};
+
+localStorage.setItem(
+  "stockHistory",
+  JSON.stringify([...stockHistory, movement]),
+);
     setProducts((currentProducts) =>
       currentProducts.map((item) =>
         item.id === product.id
