@@ -27,6 +27,9 @@ function App() {
   const savedProducts = JSON.parse(localStorage.getItem("products")) || [];
 
   const savedSales = JSON.parse(localStorage.getItem("sales")) || [];
+  const completedSales = savedSales.filter(
+    (sale) => sale.status !== "Returned",
+  );
 const salesData = Array.from({ length: 7 }, (_, index) => {
   const date = new Date();
   date.setDate(date.getDate() - (6 - index));
@@ -35,29 +38,29 @@ const salesData = Array.from({ length: 7 }, (_, index) => {
     weekday: "short",
   });
 
-  const sales = savedSales
-    .filter((sale) => {
-      const saleDate = new Date(
-        sale.date || sale.createdAt || sale.saleDate || Date.now(),
-      );
+ const sales = completedSales
+   .filter((sale) => {
+     const saleDate = new Date(
+       sale.date || sale.createdAt || sale.saleDate || Date.now(),
+     );
 
-      return saleDate.toDateString() === date.toDateString();
-    })
-    .reduce((sum, sale) => sum + Number(sale.total || 0), 0);
+     return saleDate.toDateString() === date.toDateString();
+   })
+   .reduce((sum, sale) => sum + Number(sale.total || 0), 0);
 
   return { day, sales };
 });
   const totalProducts = savedProducts.length;
 
-  const totalSales = savedSales.length;
+const totalSales = completedSales.length;
 
-  const totalRevenue = savedSales.reduce(
-    (sum, sale) => sum + Number(sale.total),
-    0,
-  );
+ const totalRevenue = completedSales.reduce(
+   (sum, sale) => sum + Number(sale.total),
+   0,
+ );
 const today = new Date().toDateString();
 
-const todaySales = savedSales.filter((sale) => {
+const todaySales = completedSales.filter((sale) => {
   return new Date(sale.date).toDateString() === today;
 });
 
@@ -67,7 +70,7 @@ const todayRevenue = todaySales.reduce(
   (sum, sale) => sum + Number(sale.total),
   0,
 );
-const productSales = savedSales.reduce((result, sale) => {
+const productSales = completedSales.reduce((result, sale) => {
   const productName = sale.product;
   const quantity = Number(sale.quantity) || 1;
 
@@ -77,7 +80,7 @@ const productSales = savedSales.reduce((result, sale) => {
 
 const topSellingProduct =
   Object.entries(productSales).sort((a, b) => b[1] - a[1])[0] || null;
-  const paymentSummary = savedSales.reduce(
+  const paymentSummary = completedSales.reduce(
     (summary, sale) => {
       const method = sale.paymentMethod;
 
@@ -140,6 +143,7 @@ const handleLogout = () => {
      <Login
        onLogin={(role) => {
          setUserRole(role);
+         setActivePage("dashboard");
          setIsLoggedIn(true);
        }}
      />
@@ -157,37 +161,42 @@ const handleLogout = () => {
           >
             Dashboard
           </button>
-
-          <button
-            className={activePage === "products" ? "active" : ""}
-            onClick={() => setActivePage("products")}
-          >
-            Products
-          </button>
+          {userRole === "Admin" && (
+            <button
+              className={activePage === "products" ? "active" : ""}
+              onClick={() => setActivePage("products")}
+            >
+              Products
+            </button>
+          )}
           <button
             className={activePage === "sales" ? "active" : ""}
             onClick={() => setActivePage("sales")}
           >
             Sales
           </button>
-          <button
-            className={activePage === "inventory" ? "active" : ""}
-            onClick={() => setActivePage("inventory")}
-          >
-            Inventory
-          </button>
+          {userRole === "Admin" && (
+            <button
+              className={activePage === "inventory" ? "active" : ""}
+              onClick={() => setActivePage("inventory")}
+            >
+              Inventory
+            </button>
+          )}
           <button
             className={activePage === "employees" ? "active" : ""}
             onClick={() => setActivePage("employees")}
           >
             Employees
           </button>
-          <button
-            className={activePage === "reports" ? "active" : ""}
-            onClick={() => setActivePage("reports")}
-          >
-            Reports
-          </button>
+          {userRole === "Admin" && (
+            <button
+              className={activePage === "reports" ? "active" : ""}
+              onClick={() => setActivePage("reports")}
+            >
+              Reports
+            </button>
+          )}
           <button
             type="button"
             className="logout-button"

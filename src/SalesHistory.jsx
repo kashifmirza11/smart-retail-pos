@@ -1,7 +1,9 @@
 import "./SalesHistory.css";
 import { useState } from "react";
 function SalesHistory() {
-  const sales = JSON.parse(localStorage.getItem("sales")) || [];
+const [sales, setSales] = useState(
+  () => JSON.parse(localStorage.getItem("sales")) || [],
+);
 const [searchTerm, setSearchTerm] = useState("");
 const [paymentFilter, setPaymentFilter] = useState("All");
 const [dateFilter, setDateFilter] = useState("");
@@ -33,9 +35,86 @@ const filteredSales = sales.filter((sale) => {
   return matchesSearch && matchesPayment && matchesDate;
 });
 const filteredRevenue = filteredSales.reduce(
-  (sum, sale) => sum + Number(sale.total || 0),
+  (sum, sale) =>
+    sale.status === "Returned" ? sum : sum + Number(sale.total || 0),
   0,
 );
+const completedFilteredSales = filteredSales.filter(
+  (sale) => sale.status !== "Returned",
+);
+
+const averageOrderValue =
+  completedFilteredSales.length > 0
+    ? filteredRevenue / completedFilteredSales.length
+    : 0;
+const productQuantities = completedFilteredSales.reduce((totals, sale) => {
+  const productName = sale.product || "Unknown Product";
+
+  totals[productName] = (totals[productName] || 0) + Number(sale.quantity || 0);
+
+  return totals;
+}, {});
+
+  const topProduct = Object.entries(productQuantities).sort(
+    (first, second) => second[1] - first[1],
+  )[0];
+
+  const topSellingProduct = topProduct
+    ? `${topProduct[0]} (${topProduct[1]} sold)`
+    : "No sales";
+    const handleReturnSale = (sale) => {
+      if (sale.status === "Returned") {
+        alert("This sale has already been returned.");
+        return;
+      }
+
+      const confirmReturn = window.confirm(
+        `Return ${sale.quantity} × ${sale.product}?`,
+      );
+
+      if (!confirmReturn) return;
+
+      const updatedSales = sales.map((item) =>
+        item.id === sale.id ? { ...item, status: "Returned" } : item,
+      );
+
+      const products = JSON.parse(localStorage.getItem("products")) || [];
+
+      const updatedProducts = products.map((product) =>
+        product.name === sale.product
+          ? {
+              ...product,
+              stock: Number(product.stock) + Number(sale.quantity),
+            }
+          : product,
+      );
+const returnedProduct = products.find(
+  (product) => product.name === sale.product,
+);
+
+if (returnedProduct) {
+  const stockHistory = JSON.parse(localStorage.getItem("stockHistory")) || [];
+
+  const returnMovement = {
+    id: Date.now(),
+    product: sale.product,
+    type: "Return In",
+    quantity: `+${sale.quantity}`,
+    previousStock: Number(returnedProduct.stock),
+    newStock: Number(returnedProduct.stock) + Number(sale.quantity),
+    date: new Date().toLocaleString(),
+  };
+
+  localStorage.setItem(
+    "stockHistory",
+    JSON.stringify([...stockHistory, returnMovement]),
+  );
+}
+      localStorage.setItem("sales", JSON.stringify(updatedSales));
+      localStorage.setItem("products", JSON.stringify(updatedProducts));
+
+      setSales(updatedSales);
+    };
 const exportToCSV = () => {
   if (filteredSales.length === 0) {
     alert("No sales available to export.");
@@ -97,6 +176,19 @@ const exportToCSV = () => {
           <span>Filtered Revenue</span>
           <strong>PKR {filteredRevenue.toLocaleString()}</strong>
         </div>
+        <div>
+          <span>Average Order Value</span>
+          <strong>
+            PKR{" "}
+            {averageOrderValue.toLocaleString(undefined, {
+              maximumFractionDigits: 2,
+            })}
+          </strong>
+        </div>
+        <div>
+          <span>Top Selling Product</span>
+          <strong>{topSellingProduct}</strong>
+        </div>
       </div>
       <div className="report-filters">
         <input
@@ -150,6 +242,7 @@ const exportToCSV = () => {
                 <th>Total</th>
                 <th>Date</th>
                 <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
 
@@ -163,7 +256,26 @@ const exportToCSV = () => {
                   <td>PKR {Number(sale.total).toLocaleString()}</td>
                   <td>{sale.date}</td>
                   <td>
-                    <span className="completed-status">{sale.status}</span>
+                    <span
+                      className={
+                        sale.status === "Returned"
+                          ? "returned-status"
+                          : "completed-status"
+                      }
+                    >
+                      {sale.status}
+                    </span>
+                  </td>
+
+                  <td>
+                    <button
+                      type="button"
+                      className="return-sale-button"
+                      onClick={() => handleReturnSale(sale)}
+                      disabled={sale.status === "Returned"}
+                    >
+                      {sale.status === "Returned" ? "Returned" : "Return"}
+                    </button>
                   </td>
                 </tr>
               ))}

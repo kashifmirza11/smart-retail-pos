@@ -580,3 +580,13 @@ th {
 .logout-button:hover {
   background: #b91c1c !important;
 }
+.user-role {
+  margin: -8px 0 25px;
+  color: #94a3b8;
+  font-size: 13px;
+  text-align: center;
+}
+
+.user-role::first-letter {
+  text-transform: uppercase;
+}
