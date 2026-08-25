@@ -4,6 +4,7 @@ require("dotenv").config();
 const { sql, connectDatabase } = require("./db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const authenticateToken = require("./authMiddleware");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -15,8 +16,7 @@ app.get("/api/health", (req, res) => {
     success: true,
     message: "Smart POS backend is running",
   });
-});
-app.get("/api/products", async (req, res) => {
+});app.get("/api/products", authenticateToken, async (req, res) => {
   try {
     const result = await sql.query(`
       SELECT
@@ -40,13 +40,24 @@ ORDER BY Id DESC
     });
   }
 });
-app.post("/api/products", async (req, res) => {
+app.post("/api/products", authenticateToken, async (req, res) => {
   try {
-    const { name, category, price, stock } = req.body;
+    console.log("Received product:", req.body);
+    const name = req.body.name ?? req.body.Name;
+    const category = req.body.category ?? req.body.Category;
+    const price = req.body.price ?? req.body.Price;
+    const stock = req.body.stock ?? req.body.Stock;
 
-    if (!name || !category || price === undefined || stock === undefined) {
+    const missingFields = [];
+
+    if (!name) missingFields.push("name");
+    if (!category) missingFields.push("category");
+    if (price === undefined) missingFields.push("price");
+    if (stock === undefined) missingFields.push("stock");
+
+    if (missingFields.length > 0) {
       return res.status(400).json({
-        message: "Name, category, price and stock are required.",
+        message: `Missing fields: ${missingFields.join(", ")}`,
       });
     }
 
@@ -77,7 +88,7 @@ app.post("/api/products", async (req, res) => {
     });
   }
 });
-app.put("/api/products/:id", async (req, res) => {
+app.put("/api/products/:id", authenticateToken, async (req, res) => {
   try {
     const productId = Number(req.params.id);
     const { name, category, price, stock } = req.body;
@@ -133,7 +144,7 @@ app.put("/api/products/:id", async (req, res) => {
     });
   }
 });
-app.delete("/api/products/:id", async (req, res) => {
+app.delete("/api/products/:id", authenticateToken, async (req, res) => {
   try {
     const productId = Number(req.params.id);
 

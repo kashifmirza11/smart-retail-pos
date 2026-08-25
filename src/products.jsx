@@ -31,10 +31,7 @@ const initialProducts = [
 ];
 
 function Products() {
-  const [products, setProducts] = useState(() => {
-    const savedProducts = localStorage.getItem("products");
-    return savedProducts ? JSON.parse(savedProducts) : initialProducts;
-  });
+  const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
   const [showForm, setShowForm] = useState(false);
@@ -46,8 +43,36 @@ function Products() {
     stock: "",
   });
   useEffect(() => {
-    localStorage.setItem("products", JSON.stringify(products));
-  }, [products]);
+    const loadProducts = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/products", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Unable to load products.");
+        }
+
+        const formattedProducts = data.map((product) => ({
+          id: product.Id,
+          name: product.Name,
+          category: product.Category,
+          price: Number(product.Price),
+          stock: Number(product.Stock),
+        }));
+
+        setProducts(formattedProducts);
+      } catch (error) {
+        alert(error.message);
+      }
+    };
+
+    loadProducts();
+  }, []);
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
@@ -124,6 +149,7 @@ const handleAddProduct = async () => {
         method: isEditing ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
         body: JSON.stringify(productData),
       },
@@ -177,6 +203,9 @@ const handleAddProduct = async () => {
         `http://localhost:5000/api/products/${productId}`,
         {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
         },
       );
 
