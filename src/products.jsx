@@ -96,36 +96,62 @@ localStorage.setItem(
 
     alert(`${amount} units added to ${product.name}.`);
   };
-  const handleAddProduct = () => {
-    if (
-      newProduct.name.trim() === "" ||
-      newProduct.price === "" ||
-      newProduct.stock === ""
-    ) {
-      alert("Please fill all product fields.");
-      return;
-    }
+const handleAddProduct = async () => {
+  if (
+    newProduct.name.trim() === "" ||
+    newProduct.price === "" ||
+    newProduct.stock === ""
+  ) {
+    alert("Please fill all product fields.");
+    return;
+  }
 
-    const productToAdd = {
-      id: Date.now(),
+  try {
+    const productData = {
       name: newProduct.name.trim(),
       category: newProduct.category,
       price: Number(newProduct.price),
       stock: Number(newProduct.stock),
     };
-    if (editingId !== null) {
-      setProducts(
-        products.map((product) =>
-          product.id === editingId
-            ? { ...productToAdd, id: editingId }
-            : product,
-        ),
-      );
 
-      setEditingId(null);
-    } else {
-      setProducts([...products, productToAdd]);
+    const isEditing = editingId !== null;
+
+    const response = await fetch(
+      isEditing
+        ? `http://localhost:5000/api/products/${editingId}`
+        : "http://localhost:5000/api/products",
+      {
+        method: isEditing ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(productData),
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to save product.");
     }
+
+    const savedProduct = {
+      id: data.Id,
+      name: data.Name,
+      category: data.Category,
+      price: Number(data.Price),
+      stock: Number(data.Stock),
+    };
+
+    setProducts((currentProducts) =>
+      isEditing
+        ? currentProducts.map((product) =>
+            product.id === editingId ? savedProduct : product,
+          )
+        : [...currentProducts, savedProduct],
+    );
+
+    setEditingId(null);
 
     setNewProduct({
       name: "",
@@ -135,11 +161,37 @@ localStorage.setItem(
     });
 
     setShowForm(false);
-  };
-  const handleDeleteProduct = (productId) => {
-    setProducts((previousProducts) =>
-      previousProducts.filter((product) => product.id !== productId),
+  } catch (error) {
+    alert(error.message);
+  }
+};
+  const handleDeleteProduct = async (productId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this product?",
     );
+
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/products/${productId}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to delete product.");
+      }
+
+      setProducts((previousProducts) =>
+        previousProducts.filter((product) => product.id !== productId),
+      );
+    } catch (error) {
+      alert(error.message);
+    }
   };
   const handleEditProduct = (product) => {
     setNewProduct({

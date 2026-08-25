@@ -6,31 +6,42 @@ function Login({ onLogin }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = (event) => {
-    event.preventDefault();
+ const handleLogin = async (event) => {
+   event.preventDefault();
 
-    if (email.trim() === "" || password.trim() === "") {
-      setError("Please enter email and password.");
-      return;
-    }
+   if (email.trim() === "" || password.trim() === "") {
+     setError("Please enter email and password.");
+     return;
+   }
 
-    let role = "";
+   try {
+     const response = await fetch("http://localhost:5000/api/auth/login", {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+       },
+       body: JSON.stringify({
+         email: email.trim(),
+         password,
+       }),
+     });
 
-    if (email === "admin@smartpos.com" && password === "admin123") {
-      role = "Admin";
-    } else if (email === "cashier@smartpos.com" && password === "cashier123") {
-      role = "Cashier";
-    } else {
-      setError("Invalid email or password.");
-      return;
-    }
+     const data = await response.json();
 
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("userRole", role);
+     if (!response.ok) {
+       throw new Error(data.message || "Login failed.");
+     }
 
-    setError("");
-    onLogin(role);
-  };
+     localStorage.setItem("isLoggedIn", "true");
+     localStorage.setItem("userRole", data.user.role);
+     localStorage.setItem("authToken", data.token);
+
+     setError("");
+     onLogin(data.user.role);
+   } catch (error) {
+     setError(error.message);
+   }
+ };
 
   return (
     <div className="login-page">
