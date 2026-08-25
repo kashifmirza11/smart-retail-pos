@@ -571,3 +571,12 @@ th {
   background: #f3e8ff;
   color: #7e22ce;
 }
+.logout-button {
+  margin-top: 30px;
+  background: #dc2626 !important;
+  color: white !important;
+}
+
+.logout-button:hover {
+  background: #b91c1c !important;
+}

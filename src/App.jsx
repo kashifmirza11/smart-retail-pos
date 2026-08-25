@@ -5,6 +5,7 @@ import Sales from "./Sales";
 import SalesHistory from "./SalesHistory";
 import Inventory from "./Inventory";
 import Employees from "./Employees";
+import Login from "./Login";
 import {
   BarChart,
   Bar,
@@ -17,6 +18,12 @@ import {
 
 function App() {
   const [activePage, setActivePage] = useState("dashboard");
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    () => localStorage.getItem("isLoggedIn") === "true",
+  );
+  const [userRole, setUserRole] = useState(
+    () => localStorage.getItem("userRole") || "",
+  );
   const savedProducts = JSON.parse(localStorage.getItem("products")) || [];
 
   const savedSales = JSON.parse(localStorage.getItem("sales")) || [];
@@ -121,11 +128,28 @@ const topSellingProduct =
 
    setShowForm(false);
  };
+const handleLogout = () => {
+  localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("userRole");
+
+  setUserRole("");
+  setIsLoggedIn(false);
+};
+ if (!isLoggedIn) {
+   return (
+     <Login
+       onLogin={(role) => {
+         setUserRole(role);
+         setIsLoggedIn(true);
+       }}
+     />
+   );
+ }
   return (
     <div className="dashboard">
       <aside className="sidebar">
         <h2>Smart POS</h2>
-
+        <p className="user-role">Logged in as: {userRole}</p>
         <nav>
           <button
             className={activePage === "dashboard" ? "active" : ""}
@@ -163,6 +187,13 @@ const topSellingProduct =
             onClick={() => setActivePage("reports")}
           >
             Reports
+          </button>
+          <button
+            type="button"
+            className="logout-button"
+            onClick={handleLogout}
+          >
+            Logout
           </button>
         </nav>
       </aside>
