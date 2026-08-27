@@ -1,12 +1,45 @@
 import "./SalesHistory.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 function SalesHistory() {
-const [sales, setSales] = useState(
-  () => JSON.parse(localStorage.getItem("sales")) || [],
-);
+const [sales, setSales] = useState([]);
 const [searchTerm, setSearchTerm] = useState("");
 const [paymentFilter, setPaymentFilter] = useState("All");
 const [dateFilter, setDateFilter] = useState("");
+useEffect(() => {
+  const loadSales = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/sales", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to load sales.");
+      }
+
+      setSales(
+        data.map((sale) => ({
+          id: sale.Id,
+          customer: sale.Customer,
+          productId: sale.ProductId,
+          product: sale.ProductName,
+          quantity: Number(sale.Quantity),
+          paymentMethod: sale.PaymentMethod,
+          total: Number(sale.Total),
+          date: new Date(sale.SaleDate).toLocaleString(),
+          status: sale.Status,
+        })),
+      );
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  loadSales();
+}, []);
 const filteredSales = sales.filter((sale) => {
   const search = searchTerm.toLowerCase();
 
@@ -62,59 +95,44 @@ const productQuantities = completedFilteredSales.reduce((totals, sale) => {
   const topSellingProduct = topProduct
     ? `${topProduct[0]} (${topProduct[1]} sold)`
     : "No sales";
-    const handleReturnSale = (sale) => {
-      if (sale.status === "Returned") {
-        alert("This sale has already been returned.");
-        return;
-      }
+const handleReturnSale = async (sale) => {
+  if (sale.status === "Returned") {
+    alert("This sale has already been returned.");
+    return;
+  }
 
-      const confirmReturn = window.confirm(
-        `Return ${sale.quantity} × ${sale.product}?`,
-      );
-
-      if (!confirmReturn) return;
-
-      const updatedSales = sales.map((item) =>
-        item.id === sale.id ? { ...item, status: "Returned" } : item,
-      );
-
-      const products = JSON.parse(localStorage.getItem("products")) || [];
-
-      const updatedProducts = products.map((product) =>
-        product.name === sale.product
-          ? {
-              ...product,
-              stock: Number(product.stock) + Number(sale.quantity),
-            }
-          : product,
-      );
-const returnedProduct = products.find(
-  (product) => product.name === sale.product,
-);
-
-if (returnedProduct) {
-  const stockHistory = JSON.parse(localStorage.getItem("stockHistory")) || [];
-
-  const returnMovement = {
-    id: Date.now(),
-    product: sale.product,
-    type: "Return In",
-    quantity: `+${sale.quantity}`,
-    previousStock: Number(returnedProduct.stock),
-    newStock: Number(returnedProduct.stock) + Number(sale.quantity),
-    date: new Date().toLocaleString(),
-  };
-
-  localStorage.setItem(
-    "stockHistory",
-    JSON.stringify([...stockHistory, returnMovement]),
+  const confirmReturn = window.confirm(
+    `Return ${sale.quantity} × ${sale.product}?`,
   );
-}
-      localStorage.setItem("sales", JSON.stringify(updatedSales));
-      localStorage.setItem("products", JSON.stringify(updatedProducts));
 
-      setSales(updatedSales);
-    };
+  if (!confirmReturn) return;
+
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/sales/${sale.id}/return`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to return sale.");
+    }
+
+    setSales(
+      sales.map((item) =>
+        item.id === sale.id ? { ...item, status: "Returned" } : item,
+      ),
+    );
+  } catch (error) {
+    alert(error.message);
+  }
+};
 const exportToCSV = () => {
   if (filteredSales.length === 0) {
     alert("No sales available to export.");

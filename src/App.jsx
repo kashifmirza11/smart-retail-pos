@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Products from "./Products";
 import Sales from "./Sales";
 import SalesHistory from "./SalesHistory";
@@ -24,9 +24,68 @@ function App() {
   const [userRole, setUserRole] = useState(
     () => localStorage.getItem("userRole") || "",
   );
-  const savedProducts = JSON.parse(localStorage.getItem("products")) || [];
+const [savedProducts, setSavedProducts] = useState([]);
+const [savedSales, setSavedSales] = useState([]);
+useEffect(() => {
+  const loadDashboardData = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
 
-  const savedSales = JSON.parse(localStorage.getItem("sales")) || [];
+      const productsResponse = await fetch(
+        "http://localhost:5000/api/products",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const salesResponse = await fetch("http://localhost:5000/api/sales", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const productsData = await productsResponse.json();
+      const salesData = await salesResponse.json();
+
+      if (!productsResponse.ok) {
+        throw new Error(productsData.message);
+      }
+
+      if (!salesResponse.ok) {
+        throw new Error(salesData.message);
+      }
+
+      setSavedProducts(
+        productsData.map((product) => ({
+          id: product.Id,
+          name: product.Name,
+          category: product.Category,
+          price: Number(product.Price),
+          stock: Number(product.Stock),
+        })),
+      );
+
+      setSavedSales(
+        salesData.map((sale) => ({
+          id: sale.Id,
+          customer: sale.Customer,
+          product: sale.ProductName,
+          quantity: Number(sale.Quantity),
+          paymentMethod: sale.PaymentMethod,
+          total: Number(sale.Total),
+          status: sale.Status,
+          date: sale.SaleDate,
+        })),
+      );
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  loadDashboardData();
+}, [activePage]);
   const completedSales = savedSales.filter(
     (sale) => sale.status !== "Returned",
   );
@@ -220,8 +279,8 @@ const handleLogout = () => {
           <SalesHistory />
         ) : (
           <>
-            <header>
-              <div>
+            <header className="dashboard-header">
+              <div className="dashboard-title">
                 <h1>Dashboard</h1>
                 <p>Welcome back, Kashif!</p>
               </div>

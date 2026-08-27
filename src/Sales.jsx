@@ -1,5 +1,5 @@
 import "./Sales.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function Sales() {
   const [customerName, setCustomerName] = useState("");
@@ -7,80 +7,108 @@ function Sales() {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [quantity, setQuantity] = useState(1);
 const [receipt, setReceipt] = useState(null);
-  const products = JSON.parse(localStorage.getItem("products")) || [];
+const [products, setProducts] = useState([]);
+useEffect(() => {
+  const loadProducts = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/products", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to load products.");
+      }
+
+      setProducts(
+        data.map((product) => ({
+          id: product.Id,
+          name: product.Name,
+          category: product.Category,
+          price: Number(product.Price),
+          stock: Number(product.Stock),
+        })),
+      );
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  loadProducts();
+}, []);
   const selectedProduct = products.find(
     (product) => String(product.id) === String(selectedProductId),
   );
 
   const totalAmount = selectedProduct ? selectedProduct.price * quantity : 0;
 
-  const handleCompleteSale = () => {
-    if (customerName.trim() === "") {
-      alert("Please enter the customer name.");
-      return;
-    }
+ const handleCompleteSale = async () => {
+   if (customerName.trim() === "") {
+     alert("Please enter the customer name.");
+     return;
+   }
 
-    if (!selectedProduct) {
-      alert("Please select a product.");
-      return;
-    }
+   if (!selectedProduct) {
+     alert("Please select a product.");
+     return;
+   }
 
-    if (quantity < 1 || quantity > selectedProduct.stock) {
-      alert(`Only ${selectedProduct.stock} items are available.`);
-      return;
-    }
+   if (quantity < 1 || quantity > selectedProduct.stock) {
+     alert(`Only ${selectedProduct.stock} items are available.`);
+     return;
+   }
 
-    const newSale = {
-      id: Date.now(),
-      customer: customerName.trim(),
-      product: selectedProduct.name,
-      quantity,
-      paymentMethod,
-      total: totalAmount,
-      date: new Date().toLocaleString(),
-      status: "Completed",
-    };
+   try {
+     const response = await fetch("http://localhost:5000/api/sales", {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+       body: JSON.stringify({
+         customer: customerName.trim(),
+         productId: selectedProduct.id,
+         quantity: Number(quantity),
+         paymentMethod,
+       }),
+     });
 
-    const previousSales = JSON.parse(localStorage.getItem("sales")) || [];
+     const data = await response.json();
 
-    localStorage.setItem("sales", JSON.stringify([...previousSales, newSale]));
+     if (!response.ok) {
+       throw new Error(data.message || "Unable to complete sale.");
+     }
 
-    const updatedProducts = products.map((product) =>
-      product.id === selectedProduct.id
-        ? {
-            ...product,
-            stock: product.stock - quantity,
-          }
-        : product,
-    );
+     setReceipt({
+       id: data.Id,
+       customer: data.Customer,
+       product: data.ProductName,
+       quantity: Number(data.Quantity),
+       paymentMethod: data.PaymentMethod,
+       total: Number(data.Total),
+       date: new Date(data.SaleDate).toLocaleString(),
+       status: data.Status,
+     });
 
-    localStorage.setItem("products", JSON.stringify(updatedProducts));
-    const stockHistory = JSON.parse(localStorage.getItem("stockHistory")) || [];
+     setProducts(
+       products.map((product) =>
+         product.id === selectedProduct.id
+           ? { ...product, stock: Number(data.NewStock) }
+           : product,
+       ),
+     );
 
-    const saleMovement = {
-      id: Date.now(),
-      product: selectedProduct.name,
-      type: "Sale Out",
-      quantity: quantity,
-      previousStock: Number(selectedProduct.stock),
-      newStock: Number(selectedProduct.stock) - Number(quantity),
-      date: new Date().toLocaleString(),
-    };
-
-    localStorage.setItem(
-      "stockHistory",
-      JSON.stringify([...stockHistory, saleMovement]),
-    );
-
- setReceipt(newSale);
-
-    setCustomerName("");
-    setSelectedProductId("");
-    setQuantity(1);
-    setPaymentMethod("Cash");
-  };
-
+     setCustomerName("");
+     setSelectedProductId("");
+     setQuantity(1);
+     setPaymentMethod("Cash");
+   } catch (error) {
+     alert(error.message);
+   }
+ };
   return (
     <div className="sales-page">
       <div className="sales-header">

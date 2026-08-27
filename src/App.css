@@ -590,3 +590,57 @@ th {
 .user-role::first-letter {
   text-transform: uppercase;
 }
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.dashboard-title {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dashboard-title h1 {
+  margin: 0;
+  line-height: 1.1;
+}
+
+.dashboard-title p {
+  margin: 0;
+  color: #64748b;
+  font-size: 18px;
+}
+
+.dashboard-header .add-product-btn {
+  flex-shrink: 0;
+}
+.products-header h1,
+.sales-header h1,
+.inventory-header h1,
+.employees-header h1,
+.sales-history-header h1 {
+  margin: 0 0 12px !important;
+  line-height: 1.15 !important;
+}
+
+.products-header p,
+.sales-header p,
+.inventory-header p,
+.employees-header p,
+.sales-history-header p {
+  margin: 0 !important;
+  line-height: 1.5 !important;
+  color: #64748b;
+}
+
+.products-header,
+.sales-header,
+.inventory-header,
+.employees-header,
+.sales-history-header {
+  margin-bottom: 28px !important;
+}

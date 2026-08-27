@@ -1,13 +1,70 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Inventory.css";
 
 function Inventory() {
-  const products = JSON.parse(localStorage.getItem("products")) || [];
- const [stockHistory, setStockHistory] = useState(
-   () => JSON.parse(localStorage.getItem("stockHistory")) || [],
- );
- const [inventorySearch, setInventorySearch] = useState("");
- const [stockFilter, setStockFilter] = useState("All Stock");
+const [products, setProducts] = useState([]);
+const [stockHistory, setStockHistory] = useState([]);
+  const [inventorySearch, setInventorySearch] = useState("");
+  const [stockFilter, setStockFilter] = useState("All Stock");
+  useEffect(() => {
+    const loadInventory = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+
+        const [productsResponse, historyResponse] = await Promise.all([
+          fetch("http://localhost:5000/api/products", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch("http://localhost:5000/api/stock-history", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
+
+        const productsData = await productsResponse.json();
+        const historyData = await historyResponse.json();
+
+        if (!productsResponse.ok) {
+          throw new Error(productsData.message || "Unable to load products.");
+        }
+
+        if (!historyResponse.ok) {
+          throw new Error(
+            historyData.message || "Unable to load stock history.",
+          );
+        }
+
+        setProducts(
+          productsData.map((product) => ({
+            id: product.Id,
+            name: product.Name,
+            category: product.Category,
+            price: Number(product.Price),
+            stock: Number(product.Stock),
+          })),
+        );
+
+        setStockHistory(
+          historyData.map((movement) => ({
+            id: movement.Id,
+            product: movement.ProductName,
+            type: movement.MovementType,
+            quantity: Math.abs(Number(movement.QuantityChange)),
+            previousStock: Number(movement.PreviousStock),
+            newStock: Number(movement.NewStock),
+            date: new Date(movement.MovementDate).toLocaleString(),
+          })),
+        );
+      } catch (error) {
+        alert(error.message);
+      }
+    };
+
+    loadInventory();
+  }, []);
   const totalProducts = products.length;
 
   const totalStock = products.reduce(
@@ -32,57 +89,73 @@ function Inventory() {
 
     return matchesSearch && matchesStock;
   });
-const handleClearHistory = () => {
+const handleClearHistory = async () => {
   const confirmed = window.confirm(
     "Are you sure you want to clear stock movement history?",
   );
 
-  if (confirmed) {
-    localStorage.removeItem("stockHistory");
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch("http://localhost:5000/api/stock-history", {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to clear stock history.");
+    }
+
     setStockHistory([]);
+  } catch (error) {
+    alert(error.message);
   }
 };
-const handleExportHistory = () => {
-  if (stockHistory.length === 0) {
-    alert("No stock movement history available.");
-    return;
-  }
+  const handleExportHistory = () => {
+    if (stockHistory.length === 0) {
+      alert("No stock movement history available.");
+      return;
+    }
 
-  const headings = [
-    "Product",
-    "Type",
-    "Quantity",
-    "Previous Stock",
-    "New Stock",
-    "Date",
-  ];
+    const headings = [
+      "Product",
+      "Type",
+      "Quantity",
+      "Previous Stock",
+      "New Stock",
+      "Date",
+    ];
 
-  const rows = stockHistory.map((movement) => [
-    movement.product,
-    movement.type,
-    movement.type === "Sale Out"
-      ? `-${movement.quantity}`
-      : `+${movement.quantity}`,
-    movement.previousStock,
-    movement.newStock,
-    movement.date,
-  ]);
+    const rows = stockHistory.map((movement) => [
+      movement.product,
+      movement.type,
+      movement.type === "Sale Out"
+        ? `-${movement.quantity}`
+        : `+${movement.quantity}`,
+      movement.previousStock,
+      movement.newStock,
+      movement.date,
+    ]);
 
-  const csvContent = [headings, ...rows]
-    .map((row) => row.map((value) => `"${value}"`).join(","))
-    .join("\n");
+    const csvContent = [headings, ...rows]
+      .map((row) => row.map((value) => `"${value}"`).join(","))
+      .join("\n");
 
-  const file = new Blob([csvContent], {
-    type: "text/csv;charset=utf-8;",
-  });
+    const file = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
 
-  const downloadLink = document.createElement("a");
-  downloadLink.href = URL.createObjectURL(file);
-  downloadLink.download = "stock-movement-history.csv";
-  downloadLink.click();
+    const downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(file);
+    downloadLink.download = "stock-movement-history.csv";
+    downloadLink.click();
 
-  URL.revokeObjectURL(downloadLink.href);
-};
+    URL.revokeObjectURL(downloadLink.href);
+  };
   return (
     <div className="inventory-page">
       <div className="inventory-header">

@@ -19,11 +19,7 @@ const initialEmployees = [
 ];
 
 function Employees() {
-  const [employees, setEmployees] = useState(() => {
-    const savedEmployees = localStorage.getItem("employees");
-
-    return savedEmployees ? JSON.parse(savedEmployees) : initialEmployees;
-  });
+const [employees, setEmployees] = useState([]);
 
   const [showForm, setShowForm] = useState(false);
 const [editingEmployeeId, setEditingEmployeeId] = useState(null);
@@ -33,40 +29,81 @@ const [editingEmployeeId, setEditingEmployeeId] = useState(null);
     phone: "",
     status: "Active",
   });
+useEffect(() => {
+  const loadEmployees = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/employees", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
 
-  useEffect(() => {
-    localStorage.setItem("employees", JSON.stringify(employees));
-  }, [employees]);
+      const data = await response.json();
 
-  const handleAddEmployee = () => {
-    if (newEmployee.name.trim() === "" || newEmployee.phone.trim() === "") {
-      alert("Please enter employee name and phone number.");
-      return;
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to load employees.");
+      }
+
+      const formattedEmployees = data.map((employee) => ({
+        id: employee.Id,
+        name: employee.Name,
+        role: employee.Role,
+        phone: employee.Phone,
+        status: employee.Status,
+      }));
+
+      setEmployees(formattedEmployees);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  loadEmployees();
+}, []);
+
+const handleAddEmployee = async () => {
+  if (newEmployee.name.trim() === "" || newEmployee.phone.trim() === "") {
+    alert("Please enter employee name and phone number.");
+    return;
+  }
+
+  try {
+    const isEditing = editingEmployeeId !== null;
+    const url = isEditing
+      ? `http://localhost:5000/api/employees/${editingEmployeeId}`
+      : "http://localhost:5000/api/employees";
+
+    const response = await fetch(url, {
+      method: isEditing ? "PUT" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      body: JSON.stringify(newEmployee),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to save employee.");
     }
 
-    if (editingEmployeeId !== null) {
+    const savedEmployee = {
+      id: data.Id,
+      name: data.Name,
+      role: data.Role,
+      phone: data.Phone,
+      status: data.Status,
+    };
+
+    if (isEditing) {
       setEmployees(
         employees.map((employee) =>
-          employee.id === editingEmployeeId
-            ? {
-                ...employee,
-                ...newEmployee,
-                name: newEmployee.name.trim(),
-                phone: newEmployee.phone.trim(),
-              }
-            : employee,
+          employee.id === editingEmployeeId ? savedEmployee : employee,
         ),
       );
     } else {
-      setEmployees([
-        ...employees,
-        {
-          id: Date.now(),
-          ...newEmployee,
-          name: newEmployee.name.trim(),
-          phone: newEmployee.phone.trim(),
-        },
-      ]);
+      setEmployees([savedEmployee, ...employees]);
     }
 
     setNewEmployee({
@@ -78,7 +115,11 @@ const [editingEmployeeId, setEditingEmployeeId] = useState(null);
 
     setEditingEmployeeId(null);
     setShowForm(false);
-  };
+  } catch (error) {
+    alert(error.message);
+  }
+};
+  
 const handleEditEmployee = (employee) => {
   setNewEmployee({
     name: employee.name,
@@ -90,26 +131,72 @@ const handleEditEmployee = (employee) => {
   setEditingEmployeeId(employee.id);
   setShowForm(true);
 };
-  const handleDeleteEmployee = (employeeId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this employee?",
+ const handleDeleteEmployee = async (employeeId) => {
+   const confirmDelete = window.confirm(
+     "Are you sure you want to delete this employee?",
+   );
+
+   if (!confirmDelete) return;
+
+   try {
+     const response = await fetch(
+       `http://localhost:5000/api/employees/${employeeId}`,
+       {
+         method: "DELETE",
+         headers: {
+           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+         },
+       },
+     );
+
+     const data = await response.json();
+
+     if (!response.ok) {
+       throw new Error(data.message || "Unable to delete employee.");
+     }
+
+     setEmployees(employees.filter((employee) => employee.id !== employeeId));
+   } catch (error) {
+     alert(error.message);
+   }
+ };
+const handleToggleStatus = async (employeeId) => {
+  const employee = employees.find((item) => item.id === employeeId);
+
+  if (!employee) return;
+
+  const updatedEmployee = {
+    ...employee,
+    status: employee.status === "Active" ? "Inactive" : "Active",
+  };
+
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/employees/${employeeId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        body: JSON.stringify(updatedEmployee),
+      },
     );
 
-    if (confirmDelete) {
-      setEmployees(employees.filter((employee) => employee.id !== employeeId));
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to change employee status.");
     }
-  };
-const handleToggleStatus = (employeeId) => {
-  setEmployees(
-    employees.map((employee) =>
-      employee.id === employeeId
-        ? {
-            ...employee,
-            status: employee.status === "Active" ? "Inactive" : "Active",
-          }
-        : employee,
-    ),
-  );
+
+    setEmployees(
+      employees.map((item) =>
+        item.id === employeeId ? { ...item, status: data.Status } : item,
+      ),
+    );
+  } catch (error) {
+    alert(error.message);
+  }
 };
   return (
     <div className="employees-page">
@@ -233,26 +320,33 @@ const handleToggleStatus = (employeeId) => {
                   </span>
                 </td>
                 <td>
-                  <button
-                    type="button"
-                    className="edit-employee-button"
-                    onClick={() => handleEditEmployee(employee)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="status-employee-button"
-                    onClick={() => handleToggleStatus(employee.id)}
-                  >
-                    {employee.status === "Active" ? "Deactivate" : "Activate"}
-                  </button>
-                  <button
-                    className="delete-employee-button"
-                    onClick={() => handleDeleteEmployee(employee.id)}
-                  >
-                    Delete
-                  </button>
+                  <div className="employee-actions">
+                    <div className="employee-actions-top">
+                      <button
+                        type="button"
+                        className="edit-employee-button"
+                        onClick={() => handleEditEmployee(employee)}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        type="button"
+                        className="delete-employee-button"
+                        onClick={() => handleDeleteEmployee(employee.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="status-employee-button"
+                      onClick={() => handleToggleStatus(employee.id)}
+                    >
+                      {employee.status === "Active" ? "Deactivate" : "Activate"}
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
